@@ -15,13 +15,13 @@ public class StoriesController : ControllerBase
     }
 
     [HttpGet("newest")]
-    public async Task<IActionResult> GetNewestStories([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    public async Task<IActionResult> GetNewestStories([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] bool nocache = false)
     {
         if (page < 1) page = 1;
         if (pageSize < 1) pageSize = 20;
         if (pageSize > 100) pageSize = 100;
 
-        var stories = await _hackerNewsService.GetNewestStoriesAsync();
+        var stories = await _hackerNewsService.GetNewestStoriesAsync(nocache);
 
         if (!string.IsNullOrWhiteSpace(search))
         {

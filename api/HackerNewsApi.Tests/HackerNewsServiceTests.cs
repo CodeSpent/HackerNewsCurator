@@ -172,6 +172,31 @@ public class HackerNewsServiceTests
     }
 
     [Fact]
+    public async Task GetNewestStoriesAsync_SkipCacheBypassesCachedStories()
+    {
+        var cache = new MemoryCache(new MemoryCacheOptions());
+        var storyIds = JsonSerializer.Serialize(new[] { 1 });
+        var story1 = JsonSerializer.Serialize(new { id = 1, title = "Story", url = "https://test.com", time = 1709600000, by = "user" });
+
+        var handler = new TrackingHttpMessageHandler(new Dictionary<string, string>
+        {
+            ["https://hacker-news.firebaseio.com/v0/newstories.json"] = storyIds,
+            ["https://hacker-news.firebaseio.com/v0/item/1.json"] = story1
+        });
+        var httpClient = CreateMockHttpClient(handler);
+        var service = new HackerNewsService(httpClient, cache);
+
+        await service.GetNewestStoriesAsync();
+        var callsAfterFirst = handler.RequestCount;
+
+        await service.GetNewestStoriesAsync(skipCache: true);
+        var callsAfterSecond = handler.RequestCount;
+
+        // skipCache should force a fresh fetch even though cache is populated
+        Assert.True(callsAfterSecond > callsAfterFirst);
+    }
+
+    [Fact]
     public async Task GetNewestStoriesAsync_LimitsTo200Stories()
     {
         var cache = new MemoryCache(new MemoryCacheOptions());

@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { StoryListComponent } from './story-list.component';
@@ -42,7 +42,7 @@ describe('StoryListComponent', () => {
   });
 
   it('should load stories on init', () => {
-    expect(mockService.getNewestStories).toHaveBeenCalledWith(1, 20, undefined);
+    expect(mockService.getNewestStories).toHaveBeenCalledWith(1, 20, undefined, false);
     expect(component.stories.length).toBe(3);
   });
 
@@ -78,7 +78,7 @@ describe('StoryListComponent', () => {
   it('should go to next page', () => {
     component.nextPage();
     expect(component.currentPage).toBe(2);
-    expect(mockService.getNewestStories).toHaveBeenCalledWith(2, 20, undefined);
+    expect(mockService.getNewestStories).toHaveBeenCalledWith(2, 20, undefined, false);
   });
 
   it('should not go below page 1', () => {
@@ -93,7 +93,7 @@ describe('StoryListComponent', () => {
     component.onSearch();
     expect(component.currentPage).toBe(1);
     expect(component.activeSearch).toBe('angular');
-    expect(mockService.getNewestStories).toHaveBeenCalledWith(1, 20, 'angular');
+    expect(mockService.getNewestStories).toHaveBeenCalledWith(1, 20, 'angular', false);
   });
 
   it('should show active search indicator', () => {
@@ -112,7 +112,7 @@ describe('StoryListComponent', () => {
     expect(component.activeSearch).toBe('');
     expect(component.searchTerm).toBe('');
     expect(component.currentPage).toBe(1);
-    expect(mockService.getNewestStories).toHaveBeenCalledWith(1, 20, undefined);
+    expect(mockService.getNewestStories).toHaveBeenCalledWith(1, 20, undefined, false);
   });
 
   it('should not show active search indicator when no search', () => {
@@ -139,7 +139,7 @@ describe('StoryListComponent', () => {
     const scrollSpy = spyOn(window, 'scrollTo');
     component.goToPage(3);
     expect(component.currentPage).toBe(3);
-    expect(mockService.getNewestStories).toHaveBeenCalledWith(3, 20, undefined);
+    expect(mockService.getNewestStories).toHaveBeenCalledWith(3, 20, undefined, false);
     expect(scrollSpy).toHaveBeenCalled();
     expect((scrollSpy.calls.mostRecent().args as any[])[0]).toEqual({ top: 0, behavior: 'smooth' });
   });

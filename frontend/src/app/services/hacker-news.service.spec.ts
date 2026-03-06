@@ -70,6 +70,46 @@ describe('HackerNewsService', () => {
     req.flush(mockResponse);
   });
 
+  it('should include nocache param when true', () => {
+    const mockResponse: StoriesResponse = {
+      stories: [],
+      totalCount: 0,
+      page: 1,
+      pageSize: 20
+    };
+
+    service.getNewestStories(1, 20, undefined, true).subscribe(response => {
+      expect(response.totalCount).toBe(0);
+    });
+
+    const req = httpMock.expectOne(r =>
+      r.url === '/api/stories/newest' &&
+      r.params.get('nocache') === 'true'
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush(mockResponse);
+  });
+
+  it('should not include nocache param when false', () => {
+    const mockResponse: StoriesResponse = {
+      stories: [],
+      totalCount: 0,
+      page: 1,
+      pageSize: 20
+    };
+
+    service.getNewestStories(1, 20, undefined, false).subscribe(response => {
+      expect(response.totalCount).toBe(0);
+    });
+
+    const req = httpMock.expectOne(r =>
+      r.url === '/api/stories/newest' &&
+      !r.params.has('nocache')
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush(mockResponse);
+  });
+
   it('should not include search param when not provided', () => {
     const mockResponse: StoriesResponse = {
       stories: [],
