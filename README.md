@@ -10,11 +10,11 @@ A full-stack application for browsing the newest stories from Hacker News. Built
 ## Getting Started
 
 ```bash
-# Install root dependencies (concurrently)
+# Install root tooling (concurrently)
 npm install
 
-# Install frontend dependencies
-npm run install:all
+# Install Angular dependencies
+npm run install:frontend
 
 # Start both API and frontend
 npm start
