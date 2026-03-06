@@ -6,11 +6,14 @@ builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient<IHackerNewsService, HackerNewsService>();
 
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
+    ?? ["http://localhost:4200"];
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -19,7 +22,9 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors("AllowAngular");
+app.UseStaticFiles();
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
 app.Run();
 
