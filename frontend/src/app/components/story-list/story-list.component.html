@@ -1,0 +1,72 @@
+<div class="story-list-container">
+  <h1>HackerNews Curator</h1>
+
+  <div class="search-bar">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="onSearch()"
+      placeholder="Search stories..."
+      aria-label="Search stories"
+    />
+    <button (click)="onSearch()">Search</button>
+  </div>
+
+  <div *ngIf="activeSearch" class="active-search">
+    <span>Results for "{{ activeSearch }}"</span>
+    <button class="clear-search" (click)="clearSearch()" aria-label="Clear search">&times;</button>
+  </div>
+
+  <ul *ngIf="loading" class="stories skeleton-list">
+    <li *ngFor="let item of skeletonItems" class="story-item skeleton-item">
+      <div class="skeleton-line skeleton-title"></div>
+      <div class="story-meta">
+        <div class="skeleton-line skeleton-meta-short"></div>
+        <div class="skeleton-line skeleton-meta-short"></div>
+        <div class="skeleton-line skeleton-meta-long"></div>
+      </div>
+    </li>
+  </ul>
+
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <ul *ngIf="!loading && stories.length > 0" class="stories">
+    <li *ngFor="let story of stories" class="story-item">
+      <a [href]="'https://news.ycombinator.com/item?id=' + story.id" target="_blank" rel="noopener noreferrer">
+        {{ story.title }}
+      </a>
+      <div class="story-meta">
+        <span class="story-by">{{ story.by }}</span>
+        <span class="story-time">{{ story.time * 1000 | date:'short' }}</span>
+        <a
+          *ngIf="story.url"
+          [href]="story.url"
+          [title]="story.url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="direct-link"
+        >{{ truncateUrl(story.url) }}<svg class="external-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+    </li>
+  </ul>
+
+  <div *ngIf="!loading && stories.length === 0 && !error" class="no-results">
+    No stories found.
+  </div>
+
+  <div *ngIf="totalPages > 1" class="pagination" #paginationContainer>
+    <button (click)="previousPage()" [disabled]="currentPage === 1">Previous</button>
+    <ng-container *ngFor="let page of pageNumbers">
+      <span *ngIf="page === '…'" class="ellipsis">…</span>
+      <button
+        *ngIf="page !== '…'"
+        (click)="goToPage(+page)"
+        [class.active]="page === currentPage"
+        class="page-btn"
+      >
+        {{ page }}
+      </button>
+    </ng-container>
+    <button (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+  </div>
+</div>

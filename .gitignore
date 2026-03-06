@@ -1,0 +1,53 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Angular
+frontend/dist/
+frontend/.angular/
+frontend/.sass-cache/
+out-tsc/
+tmp/
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.userosscache
+*.sln.docstates
+project.lock.json
+TestResults/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+appsettings.Development.json
+.claude
+
+# Coverage / test
+coverage/
+*.lcov
+
+# Misc
+*.log
