@@ -24,6 +24,7 @@ export class StoryListComponent implements OnInit {
   error = '';
   maxVisiblePages = 10;
   skeletonItems = Array(20);
+  nocache = new URLSearchParams(window.location.search).has('nocache');
 
   constructor(private hackerNewsService: HackerNewsService) {}
 
@@ -48,7 +49,7 @@ export class StoryListComponent implements OnInit {
     this.loading = true;
     this.error = '';
 
-    this.hackerNewsService.getNewestStories(this.currentPage, this.pageSize, this.activeSearch || undefined)
+    this.hackerNewsService.getNewestStories(this.currentPage, this.pageSize, this.activeSearch || undefined, this.nocache)
       .subscribe({
         next: (response) => {
           this.stories = response.stories;

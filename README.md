@@ -61,7 +61,20 @@ cd frontend && npx ng test
 
 ### In-Memory Caching
 
-The API caches fetched stories using `IMemoryCache` with a 5-minute TTL. This avoids hammering the HackerNews Firebase API on every request. See `HackerNewsService.cs` for the cache key `"newest_stories"` and `TimeSpan.FromMinutes(5)` duration.
+The API caches fetched stories using `IMemoryCache` with a 5-minute TTL. This avoids hammering the HackerNews Firebase API on every request. A `SemaphoreSlim`-based lock prevents thundering herd on cache expiry — only one request fetches fresh data while others wait and reuse the result. See `HackerNewsService.cs` for the cache key `"newest_stories"` and `TimeSpan.FromMinutes(5)` duration.
+
+To compare cached vs uncached response times, add `nocache` to the URL:
+
+```
+# Frontend — browse with cache disabled
+http://localhost:4200/?nocache
+
+# API directly — cached (fast, typically <10ms)
+curl -w "\nTime: %{time_total}s\n" "http://localhost:5000/api/stories/newest"
+
+# API directly — uncached (fetches all stories fresh from HN API)
+curl -w "\nTime: %{time_total}s\n" "http://localhost:5000/api/stories/newest?nocache=true"
+```
 
 ### Dependency Injection
 

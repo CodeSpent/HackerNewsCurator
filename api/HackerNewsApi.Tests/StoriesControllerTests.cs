@@ -26,7 +26,7 @@ public class StoriesControllerTests
             new() { Id = 2, Title = "Story 2", Url = "https://example.com/2" },
             new() { Id = 3, Title = "Story 3", Url = null }
         };
-        _mockService.Setup(s => s.GetNewestStoriesAsync()).ReturnsAsync(stories);
+        _mockService.Setup(s => s.GetNewestStoriesAsync(false)).ReturnsAsync(stories);
 
         var result = await _controller.GetNewestStories(null, 1, 20) as OkObjectResult;
 
@@ -43,7 +43,7 @@ public class StoriesControllerTests
             new() { Id = 2, Title = "React Guide", Url = "https://example.com/2" },
             new() { Id = 3, Title = "Angular Best Practices", Url = "https://example.com/3" }
         };
-        _mockService.Setup(s => s.GetNewestStoriesAsync()).ReturnsAsync(stories);
+        _mockService.Setup(s => s.GetNewestStoriesAsync(false)).ReturnsAsync(stories);
 
         var result = await _controller.GetNewestStories("Angular", 1, 20) as OkObjectResult;
 
@@ -58,7 +58,7 @@ public class StoriesControllerTests
         var stories = Enumerable.Range(1, 50)
             .Select(i => new Story { Id = i, Title = $"Story {i}" })
             .ToList();
-        _mockService.Setup(s => s.GetNewestStoriesAsync()).ReturnsAsync(stories);
+        _mockService.Setup(s => s.GetNewestStoriesAsync(false)).ReturnsAsync(stories);
 
         var result = await _controller.GetNewestStories(null, 2, 10) as OkObjectResult;
 
@@ -75,7 +75,7 @@ public class StoriesControllerTests
         {
             new() { Id = 1, Title = "Story 1" }
         };
-        _mockService.Setup(s => s.GetNewestStoriesAsync()).ReturnsAsync(stories);
+        _mockService.Setup(s => s.GetNewestStoriesAsync(false)).ReturnsAsync(stories);
 
         var result = await _controller.GetNewestStories(null, -1, 0) as OkObjectResult;
 
@@ -93,7 +93,7 @@ public class StoriesControllerTests
             new() { Id = 1, Title = "ANGULAR Tutorial" },
             new() { Id = 2, Title = "React Guide" }
         };
-        _mockService.Setup(s => s.GetNewestStoriesAsync()).ReturnsAsync(stories);
+        _mockService.Setup(s => s.GetNewestStoriesAsync(false)).ReturnsAsync(stories);
 
         var result = await _controller.GetNewestStories("angular", 1, 20) as OkObjectResult;
 
@@ -108,7 +108,7 @@ public class StoriesControllerTests
         var stories = Enumerable.Range(1, 5)
             .Select(i => new Story { Id = i, Title = $"Story {i}" })
             .ToList();
-        _mockService.Setup(s => s.GetNewestStoriesAsync()).ReturnsAsync(stories);
+        _mockService.Setup(s => s.GetNewestStoriesAsync(false)).ReturnsAsync(stories);
 
         var result = await _controller.GetNewestStories(null, 1, 200) as OkObjectResult;
 
@@ -125,7 +125,7 @@ public class StoriesControllerTests
             new() { Id = 1, Title = "Story 1" },
             new() { Id = 2, Title = "Story 2" }
         };
-        _mockService.Setup(s => s.GetNewestStoriesAsync()).ReturnsAsync(stories);
+        _mockService.Setup(s => s.GetNewestStoriesAsync(false)).ReturnsAsync(stories);
 
         var result = await _controller.GetNewestStories("", 1, 20) as OkObjectResult;
 
@@ -142,7 +142,7 @@ public class StoriesControllerTests
             new() { Id = 1, Title = "Story 1" },
             new() { Id = 2, Title = "Story 2" }
         };
-        _mockService.Setup(s => s.GetNewestStoriesAsync()).ReturnsAsync(stories);
+        _mockService.Setup(s => s.GetNewestStoriesAsync(false)).ReturnsAsync(stories);
 
         var result = await _controller.GetNewestStories("   ", 1, 20) as OkObjectResult;
 
@@ -154,7 +154,7 @@ public class StoriesControllerTests
     [Fact]
     public async Task GetNewestStories_ReturnsEmptyWhenNoStories()
     {
-        _mockService.Setup(s => s.GetNewestStoriesAsync()).ReturnsAsync(new List<Story>());
+        _mockService.Setup(s => s.GetNewestStoriesAsync(false)).ReturnsAsync(new List<Story>());
 
         var result = await _controller.GetNewestStories(null, 1, 20) as OkObjectResult;
 
@@ -169,7 +169,7 @@ public class StoriesControllerTests
         var stories = Enumerable.Range(1, 30)
             .Select(i => new Story { Id = i, Title = $"Story {i}" })
             .ToList();
-        _mockService.Setup(s => s.GetNewestStoriesAsync()).ReturnsAsync(stories);
+        _mockService.Setup(s => s.GetNewestStoriesAsync(false)).ReturnsAsync(stories);
 
         var result = await _controller.GetNewestStories(null, 2, 10) as OkObjectResult;
 
@@ -188,7 +188,7 @@ public class StoriesControllerTests
         var stories = Enumerable.Range(1, 25)
             .Select(i => new Story { Id = i, Title = i % 2 == 0 ? $"Angular {i}" : $"React {i}" })
             .ToList();
-        _mockService.Setup(s => s.GetNewestStoriesAsync()).ReturnsAsync(stories);
+        _mockService.Setup(s => s.GetNewestStoriesAsync(false)).ReturnsAsync(stories);
 
         // 12 Angular stories (2,4,6,...,24), page 2 with pageSize 5 should give stories at index 5-9
         var result = await _controller.GetNewestStories("Angular", 2, 5) as OkObjectResult;
@@ -201,13 +201,28 @@ public class StoriesControllerTests
     }
 
     [Fact]
+    public async Task GetNewestStories_PassesNocacheToService()
+    {
+        var stories = new List<Story>
+        {
+            new() { Id = 1, Title = "Story 1" }
+        };
+        _mockService.Setup(s => s.GetNewestStoriesAsync(true)).ReturnsAsync(stories);
+
+        var result = await _controller.GetNewestStories(null, 1, 20, nocache: true) as OkObjectResult;
+
+        Assert.NotNull(result);
+        _mockService.Verify(s => s.GetNewestStoriesAsync(true), Times.Once);
+    }
+
+    [Fact]
     public async Task GetNewestStories_PageBeyondResultsReturnsEmpty()
     {
         var stories = new List<Story>
         {
             new() { Id = 1, Title = "Only Story" }
         };
-        _mockService.Setup(s => s.GetNewestStoriesAsync()).ReturnsAsync(stories);
+        _mockService.Setup(s => s.GetNewestStoriesAsync(false)).ReturnsAsync(stories);
 
         var result = await _controller.GetNewestStories(null, 5, 20) as OkObjectResult;
 

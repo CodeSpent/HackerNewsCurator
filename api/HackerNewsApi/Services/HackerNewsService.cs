@@ -10,6 +10,8 @@ public class HackerNewsService : IHackerNewsService
     private const string CacheKey = "newest_stories";
     private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
 
+    private static readonly SemaphoreSlim CacheLock = new(1, 1);
+
     private readonly HttpClient _httpClient;
     private readonly IMemoryCache _cache;
 
@@ -19,31 +21,44 @@ public class HackerNewsService : IHackerNewsService
         _cache = cache;
     }
 
-    public async Task<IEnumerable<Story>> GetNewestStoriesAsync()
+    public async Task<IEnumerable<Story>> GetNewestStoriesAsync(bool skipCache = false)
     {
-        if (_cache.TryGetValue(CacheKey, out IEnumerable<Story>? cachedStories) && cachedStories is not null)
+        if (!skipCache && _cache.TryGetValue(CacheKey, out IEnumerable<Story>? cachedStories) && cachedStories is not null)
         {
             return cachedStories;
         }
 
-        var storyIds = await _httpClient.GetFromJsonAsync<int[]>($"{BaseUrl}/newstories.json");
-
-        if (storyIds is null || storyIds.Length == 0)
+        await CacheLock.WaitAsync();
+        try
         {
-            return [];
+            if (!skipCache && _cache.TryGetValue(CacheKey, out cachedStories) && cachedStories is not null)
+            {
+                return cachedStories;
+            }
+
+            var storyIds = await _httpClient.GetFromJsonAsync<int[]>($"{BaseUrl}/newstories.json");
+
+            if (storyIds is null || storyIds.Length == 0)
+            {
+                return [];
+            }
+
+            var tasks = storyIds.Take(200).Select(id => FetchStoryAsync(id));
+            var stories = await Task.WhenAll(tasks);
+
+            var result = stories
+                .Where(s => s is not null)
+                .Cast<Story>()
+                .ToList();
+
+            _cache.Set(CacheKey, result, CacheDuration);
+
+            return result;
         }
-
-        var tasks = storyIds.Take(200).Select(id => FetchStoryAsync(id));
-        var stories = await Task.WhenAll(tasks);
-
-        var result = stories
-            .Where(s => s is not null)
-            .Cast<Story>()
-            .ToList();
-
-        _cache.Set(CacheKey, result, CacheDuration);
-
-        return result;
+        finally
+        {
+            CacheLock.Release();
+        }
     }
 
     private async Task<Story?> FetchStoryAsync(int id)

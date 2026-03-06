@@ -11,13 +11,17 @@ export class HackerNewsService {
 
   constructor(private http: HttpClient) {}
 
-  getNewestStories(page: number, pageSize: number, search?: string): Observable<StoriesResponse> {
+  getNewestStories(page: number, pageSize: number, search?: string, nocache?: boolean): Observable<StoriesResponse> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
 
     if (search) {
       params = params.set('search', search);
+    }
+
+    if (nocache) {
+      params = params.set('nocache', 'true');
     }
 
     return this.http.get<StoriesResponse>(`${this.apiUrl}/newest`, { params });
