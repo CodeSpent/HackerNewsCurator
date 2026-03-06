@@ -31,4 +31,4 @@ jobs:
       - name: Install dependencies
         run: cd frontend && npm ci
       - name: Run frontend tests
-        run: cd frontend && npx ng test --watch=false
+        run: cd frontend && npx ng test --watch=false --browsers=ChromeHeadless
