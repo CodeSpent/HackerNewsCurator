@@ -2,6 +2,11 @@
 
 A full-stack application for browsing the newest stories from Hacker News. Built with a .NET 9 API backend and Angular 18 frontend in a monorepo structure.
 
+## Deployment
+I chose to deploy this as a Docker container to [Render](https://render.com) due to the scale and scope of the project and have set up DNS under the [phanford.dev](https://phanford.dev) umbrella for easy access to a deployed version.
+
+You can access the deployed version of this application at [https://hackernews.phanford.dev](https://hackernews.phanford.dev).
+
 ## Prerequisites
 
 - [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
